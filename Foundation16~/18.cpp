@@ -27,6 +27,56 @@ struct Cube {
 
 Cube cube[3][8];
 
+glm::vec3 CT[24] = { glm::vec3(0.0, 1.0, -1.0),//발판 위치
+					glm::vec3(0, 2, -2) ,
+					glm::vec3(0, 3, -3) ,
+					glm::vec3(0, 4, -4) ,
+					glm::vec3(0, 5, -5) ,
+					glm::vec3(0, 6, -6) ,
+					glm::vec3(0, 7, -7) ,
+					glm::vec3(0, 8, -8) ,
+					glm::vec3(0, 9, -9) ,
+					glm::vec3(0, 10, -10) ,
+					glm::vec3(0, 11, -11) ,
+					glm::vec3(0, 12, -12) ,
+					glm::vec3(0, 13,-13) ,
+					glm::vec3(0, 14, -14) ,
+					glm::vec3(0, 15, -15) ,
+					glm::vec3(0, 16, -16) ,
+					glm::vec3(0, 17, -17) ,
+					glm::vec3(0, 18, -18) ,
+					glm::vec3(0, 19, -19) ,
+					glm::vec3(0, 20, -20) ,
+					glm::vec3(0, 21, -21) ,
+					glm::vec3(0, 22, -22) ,
+					glm::vec3(0, 23, -23) ,
+					glm::vec3(0, 24, -24) };
+
+glm::vec3 CR[24] = { glm::vec3(0, 0, 0),//발판 회전
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) ,
+					glm::vec3(0, 0, 0) };
+
 //플레이어(크레인)
 struct Player {
 	int x, y, z;
@@ -62,13 +112,18 @@ GLuint vbo[3];
 GLuint vbo_color[3];
 GLuint ebo[3];
 
+GLuint vao_cube[24];
+GLuint vbo_cube[24];
+GLuint vbo_color_cube[24];
+GLuint ebo_cube[24];
+
 //---쉐이더 프로그램
 GLuint s_program;
 GLuint s_program_line;
 GLuint s_program_floor;
 
 //-----색
-GLfloat cube_color[3][24];
+GLfloat cube_color[4][24];
 
 
 void RandRGB()
@@ -79,7 +134,7 @@ void RandRGB()
 
 	for (int i = 0; i < 24; i++)
 	{
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < 4; j++)
 		{
 			cube_color[j][i] = rd_RGB(eng);
 		}
@@ -98,6 +153,12 @@ glm::vec3 pos_trans(0.0f, 3.0f, 5.0f);
 glm::vec3 dir_trans(0.0f, 0.0f, 0.0f);
 GLfloat rotate_screen = 0.0;
 GLfloat rotate_camera = 0.0;
+
+struct Camera_pos {
+	GLfloat x, y, z;
+};
+
+Camera_pos camera_pos = { 0, 0, 0 };
 
 void main(int argc, char** argv)		//---윈도우 출력, 콜백함수 설정
 {
@@ -144,7 +205,8 @@ GLvoid drawScene()
 	glm::vec4 cameraPos_trans(0.0f, 0.0f, 0.0f, 1.0f);
 	glm::vec4 cameraDirection_trans(0.0f, -3.0f, -5.0f, 1.0f);
 
-	glm::mat4 pos = glm::mat4(1.0f);//카메라 회전의 중심점
+	glm::mat4 pos = glm::mat4(1.0f);
+	pos = glm::translate(pos, glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));//카메라 회전의 중심점
 	pos = glm::rotate(pos, (GLfloat)glm::radians(rotate_screen), glm::vec3(0.0, 1.0, 0.0));
 	pos = glm::translate(pos, glm::vec3(pos_trans.x, pos_trans.y, pos_trans.z));
 	cameraPos_trans = pos * cameraPos_trans;
@@ -190,14 +252,6 @@ GLvoid drawScene()
 	glPointSize(10.0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	//---------- 발판 그리기
-	glUseProgram(s_program);
-
-	unsigned int modelLoc = glGetUniformLocation(s_program, "model");
-
-	glUniformMatrix4fv(viewLoc_shape, 1, GL_FALSE, &view[0][0]);
-	glUniformMatrix4fv(projLoc_shape, 1, GL_FALSE, &projection[0][0]);
-
 
 	//---------- 사각형 1 그리기
 	glUseProgram(s_program);
@@ -208,6 +262,7 @@ GLvoid drawScene()
 	glUniformMatrix4fv(projLoc_shape, 1, GL_FALSE, &projection[0][0]);
 
 	glm::mat4 Model_transfrom[4] = { glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f) };
+	
 	for (int i = 0; i < 4; i++)
 	{
 		if(i == 3)
@@ -220,6 +275,7 @@ GLvoid drawScene()
 		else if(i == 3)
 			Model_transfrom[i] *= Model_transfrom[1];
 
+		
 		Model_transfrom[i] = glm::translate(Model_transfrom[i], glm::vec3(Cube_trans[i].x, Cube_trans[i].y, Cube_trans[i].z));
 		Model_transfrom[i] = glm::rotate(Model_transfrom[i], (GLfloat)glm::radians(Cube_rotate[i].x), glm::vec3(1.0, 0.0, 0.0));
 		Model_transfrom[i] = glm::rotate(Model_transfrom[i], (GLfloat)glm::radians(Cube_rotate[i].y), glm::vec3(0.0, 1.0, 0.0));
@@ -228,7 +284,23 @@ GLvoid drawScene()
 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(Model_transfrom[i]));
 
+		glDrawElements(GL_TRIANGLES, 48, GL_UNSIGNED_INT, 0);
+	}
+	glm::mat4 cube_Model_transfrom[24] = { glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f) };
+	for (int i = 0; i < 24; i++) {
+		
+		glBindVertexArray(vao_cube[i]);
+
+		cube_Model_transfrom[i] = glm::translate(cube_Model_transfrom[i], glm::vec3(CT[i].x, CT[i].y, CT[i].z));
+		cube_Model_transfrom[i] = glm::rotate(cube_Model_transfrom[i], (GLfloat)glm::radians(CR[i].x), glm::vec3(1.0, 0.0, 0.0));
+		cube_Model_transfrom[i] = glm::rotate(cube_Model_transfrom[i], (GLfloat)glm::radians(CR[i].y), glm::vec3(0.0, 1.0, 0.0));
+		cube_Model_transfrom[i] = glm::rotate(cube_Model_transfrom[i], (GLfloat)glm::radians(CR[i].z), glm::vec3(0.0, 0.0, 1.0));
+		cube_Model_transfrom[i] = glm::scale(cube_Model_transfrom[i], glm::vec3(1.0, 2.0, 1.0));
+
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(cube_Model_transfrom[i]));
+
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
 	}
 
 	glutSwapBuffers();
@@ -348,19 +420,20 @@ void InitBuffer()
 	glGenBuffers(3, vbo_color);
 	glGenBuffers(3, ebo);
 
+	glGenVertexArrays(24, vao_cube);
+	glGenBuffers(24, vbo_cube);
+	glGenBuffers(24, vbo_color_cube);
+	glGenBuffers(24, ebo_cube);
 
-	obj objfile[27];
+
+	obj objfile[4];
 	objfile[0].OpenFile("cube_18_1.obj");
 	objfile[1].OpenFile("cube_18_2.obj");
 	objfile[2].OpenFile("cube_18_3.obj");
-	for (int i = 0; i < 27; i++) {
-		objfile[i].OpenFile("cube.obj");
-	}
-	
+	objfile[3].OpenFile("cube_18_4.obj");
 
 
-
-	for (int i = 0; i < 27; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		objfile[i].ReadObj();
 
@@ -380,9 +453,34 @@ void InitBuffer()
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(1);
 	}
+
+	for (int i = 0; i < 24; i++)
+	{
+		objfile[3].ReadObj();
+
+		glBindVertexArray(vao_cube[i]);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_cube[i]);
+		glBufferData(GL_ARRAY_BUFFER, objfile[3].vertexNum * 3 * sizeof(GLfloat), objfile[3].vertex, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_cube[i]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, objfile[3].faceNum * 3 * sizeof(int), objfile[3].face_v, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo_color_cube[i]);
+		glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), cube_color[0], GL_STATIC_DRAW);
+
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+		glEnableVertexAttribArray(1);
+	}
+
+
 }
 
 int isMove_x = 0;
+int isMove_y = 0;
+int isMove_z = 0;
 int isRotate = 0;
 int isRotateArm = 0;
 int isCameraRotate_ori = 0;
@@ -397,27 +495,23 @@ GLvoid TimerFunction(int value)
 
 		glutTimerFunc(10, TimerFunction, 1);
 	}
+	if (value == 3 && isMove_y != 0)
+	{
+		Cube_trans[0].y += isMove_y * 0.01;
+
+		glutTimerFunc(10, TimerFunction, 3);
+	}
+	if (value == 4 && isMove_z != 0)
+	{
+		Cube_trans[0].z += isMove_z * 0.01;
+
+		glutTimerFunc(10, TimerFunction, 4);
+	}
 	if (value == 2 && isRotate != 0)
 	{
 		Cube_rotate[1].y += isRotate;
 
 		glutTimerFunc(10, TimerFunction, 2);
-	}
-	if (value == 3 && isRotateArm != 0)
-	{
-		Cube_rotate[2].x += isRotateArm;
-		Cube_rotate[3].x -= isRotateArm;
-
-		if (Cube_rotate[2].x >= 90 || Cube_rotate[2].x <= -90)
-			isRotateArm *= -1;
-		glutTimerFunc(10, TimerFunction, 3);
-	}
-	//-----카메라 이동
-	if (value == 4 && isCameraRotate_ori != 0)
-	{
-		rotate_screen += isCameraRotate_ori * 0.5;
-
-		glutTimerFunc(10, TimerFunction, 4);
 	}
 	glutPostRedisplay();
 }
@@ -428,7 +522,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'b':
+	case 'a':
 		if (isMove_x == 0)
 			glutTimerFunc(10, TimerFunction, 1);
 		
@@ -437,7 +531,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 			isMove_x = 1;
 		break;
-	case 'B':
+	case 'A':
 		if (isMove_x == 0)
 			glutTimerFunc(10, TimerFunction, 1);
 
@@ -445,6 +539,42 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 			isMove_x = 0;
 		else
 			isMove_x = -1;
+		break;
+	case 's':
+		if (isMove_y == 0)
+			glutTimerFunc(10, TimerFunction, 3);
+
+		if (isMove_y == 1)
+			isMove_y = 0;
+		else
+			isMove_y = 1;
+		break;
+	case 'S':
+		if (isMove_y == 0)
+			glutTimerFunc(10, TimerFunction, 3);
+
+		if (isMove_y == -1)
+			isMove_y = 0;
+		else
+			isMove_y = -1;
+		break;
+	case 'd':
+		if (isMove_z == 0)
+			glutTimerFunc(10, TimerFunction, 4);
+
+		if (isMove_z == 1)
+			isMove_z = 0;
+		else
+			isMove_z = 1;
+		break;
+	case 'D':
+		if (isMove_z == 0)
+			glutTimerFunc(10, TimerFunction, 4);
+
+		if (isMove_z == -1)
+			isMove_z = 0;
+		else
+			isMove_z = -1;
 		break;
 	case 'm':
 		if (isRotate == 0)
@@ -463,24 +593,6 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 			isRotate = 0;
 		else
 			isRotate = -1;
-		break;
-	case 't':
-		if (isRotateArm == 0)
-			glutTimerFunc(10, TimerFunction, 3);
-
-		if (isRotateArm == 1)
-			isRotateArm = 0;
-		else
-			isRotateArm = 1;
-		break;
-	case 'T':
-		if (isRotateArm == 0)
-			glutTimerFunc(10, TimerFunction, 3);
-
-		if (isRotateArm == -1)
-			isRotateArm = 0;
-		else
-			isRotateArm = -1;
 		break;
 	case 'z':
 		pos_trans.z += 0.1;
@@ -506,30 +618,6 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case 'R':
 		rotate_screen -= 1.0;
 		break;
-	case 'a':
-		if (isCameraRotate_ori == 0)
-		{
-			isCameraRotate_ori = 1;
-			glutTimerFunc(10, TimerFunction, 4);
-		}
-		else if (isCameraRotate_ori == 1)
-			isCameraRotate_ori = 0;
-		break;
-	case 'A':
-		isCameraRotate_ori = 0;
-		break;
-	case 's':
-		isMove_x = 0;
-		isRotate = 0;
-		isRotateArm = 0;
-		isCameraRotate_ori = 0;
-		break;
-	case 'S':
-		isMove_x = 0;
-		isRotate = 0;
-		isRotateArm = 0;
-		isCameraRotate_ori = 0;
-		break;
 	case 'c':
 		isMove_x = 0;
 		isRotate = 0;
@@ -554,7 +642,27 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case 'q':
 		glutDestroyWindow(windowID);
 		break;
+
+	case'j':
+		camera_pos.x += 0.1f;
+		break;
+	case'J':
+		camera_pos.x -= 0.1f;
+		break;
+	case'k':
+		camera_pos.y += 0.1f;
+		break;
+	case'K':
+		camera_pos.y -= 0.1f;
+		break;
+	case'l':
+		camera_pos.z += 0.1f;
+		break;
+	case'L':
+		camera_pos.z -= 0.1f;
+		break;
 	}
+
 
 	glutPostRedisplay();
 }

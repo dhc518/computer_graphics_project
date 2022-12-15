@@ -15,13 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="16.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="objread.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="17.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="18.cpp">
@@ -29,9 +23,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="pyramid_16.obj">
-      <Filter>리소스 파일</Filter>
-    </Object>
     <Object Include="cube_18_1.obj">
       <Filter>리소스 파일</Filter>
     </Object>
@@ -46,6 +37,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="vertex_shape.glsl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="vertex.glsl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="vertex_floor.glsl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="vertex_line.glsl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="fragment.glsl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="fragment_floor.glsl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="fragment_line.glsl">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="fragment_shape.glsl">
       <Filter>리소스 파일</Filter>
     </None>
   </ItemGroup>
