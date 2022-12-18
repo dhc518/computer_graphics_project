@@ -10,9 +10,8 @@
 
 using namespace std;
 
-int stage = 1;
+int stage = 0;
 int limit = 4;
-bool reset;
 
 //맵
 struct Map {
@@ -32,8 +31,8 @@ struct Cube {
 
 Cube cube[8];
 
-glm::vec3 CT1[31] = {
-
+glm::vec3 CT[3][31] = {
+	{
 					glm::vec3(0, 0, 0) , //바닥부분 시작
 					glm::vec3(1, 0, 0) ,
 					glm::vec3(2, 0, 0) ,
@@ -65,9 +64,8 @@ glm::vec3 CT1[31] = {
 					glm::vec3(3, 5, -1) ,
 					glm::vec3(4, 5, -1) , //벽부분 끝
 					glm::vec3(2, 6, -1)
-};
-glm::vec3 CT2[19] = {
-
+	},
+	{
 					glm::vec3(0, 0, 0) , //바닥부분 시작
 					glm::vec3(1, 0, 0) ,
 					glm::vec3(2, 0, 0) , //바닥부분 끝
@@ -87,8 +85,8 @@ glm::vec3 CT2[19] = {
 					glm::vec3(1, 5, -1) ,
 					glm::vec3(2, 5, -1) , //벽부분 끝
 					glm::vec3(1, 6, -1)
-};
-glm::vec3 CT3[25] = {
+	},
+	{
 					glm::vec3(0, 0, 0) ,//바닥부분 시작
 					glm::vec3(1, 0, -1) ,
 					glm::vec3(2, 0, -2) ,
@@ -114,7 +112,9 @@ glm::vec3 CT3[25] = {
 					glm::vec3(3, 4, -4) ,
 					glm::vec3(3, 5, -4) , //벽부분 끝
 					glm::vec3(3, 6, -4)
+	}
 };
+
 
 glm::vec3 CR = glm::vec3(0, 0, 0);
 
@@ -166,6 +166,8 @@ int WinSize_r = 1000;
 int WinSize_w = 1000;
 int windowID;		//---윈도우 아이디
 
+//함수
+void reset();
 
 
 //---콜백 함수
@@ -410,9 +412,9 @@ GLvoid drawScene()
 		
 		glBindVertexArray(vao_cube1[i]);
 
-		if (stage == 1) cube1_Model_transfrom[i] = glm::translate(cube1_Model_transfrom[i], glm::vec3(CT1[i].x, CT1[i].y, CT1[i].z));
-		else if (stage == 2) cube1_Model_transfrom[i] = glm::translate(cube1_Model_transfrom[i], glm::vec3(CT2[i].x, CT2[i].y, CT2[i].z));
-		else if (stage == 3) cube1_Model_transfrom[i] = glm::translate(cube1_Model_transfrom[i], glm::vec3(CT3[i].x, CT3[i].y, CT3[i].z));
+		cube1_Model_transfrom[i] = glm::translate(cube1_Model_transfrom[i], glm::vec3(CT[stage][i].x, CT[stage][i].y, CT[stage][i].z));
+		//else if (stage == 2) cube1_Model_transfrom[i] = glm::translate(cube1_Model_transfrom[i], glm::vec3(CT2[i].x, CT2[i].y, CT2[i].z));
+		//else if (stage == 3) cube1_Model_transfrom[i] = glm::translate(cube1_Model_transfrom[i], glm::vec3(CT3[i].x, CT3[i].y, CT3[i].z));
 		cube1_Model_transfrom[i] = glm::rotate(cube1_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 		cube1_Model_transfrom[i] = glm::rotate(cube1_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 		cube1_Model_transfrom[i] = glm::rotate(cube1_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
@@ -424,16 +426,16 @@ GLvoid drawScene()
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	}
-
+	
 	//4-7
 	glm::mat4 cube2_Model_transfrom[4] = { glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f) };
 	for (int i = 0; i < 4; i++) {
 
 		glBindVertexArray(vao_cube2[i]);
 
-		if (stage == 1) cube2_Model_transfrom[i] = glm::translate(cube2_Model_transfrom[i], glm::vec3(CT1[i+4].x, CT1[i+4].y, CT1[i+4].z));
-		else if (stage == 2) cube2_Model_transfrom[i] = glm::translate(cube2_Model_transfrom[i], glm::vec3(CT2[i + 4].x, CT2[i + 4].y, CT2[i + 4].z));
-		else if (stage == 3) cube2_Model_transfrom[i] = glm::translate(cube2_Model_transfrom[i], glm::vec3(CT3[i + 4].x, CT3[i + 4].y, CT3[i + 4].z));
+		cube2_Model_transfrom[i] = glm::translate(cube2_Model_transfrom[i], glm::vec3(CT[stage][i+4].x, CT[stage][i+4].y, CT[stage][i+4].z));
+		//else if (stage == 2) cube2_Model_transfrom[i] = glm::translate(cube2_Model_transfrom[i], glm::vec3(CT2[i + 4].x, CT2[i + 4].y, CT2[i + 4].z));
+		//else if (stage == 3) cube2_Model_transfrom[i] = glm::translate(cube2_Model_transfrom[i], glm::vec3(CT3[i + 4].x, CT3[i + 4].y, CT3[i + 4].z));
 		cube2_Model_transfrom[i] = glm::rotate(cube2_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 		cube2_Model_transfrom[i] = glm::rotate(cube2_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 		cube2_Model_transfrom[i] = glm::rotate(cube2_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
@@ -444,16 +446,16 @@ GLvoid drawScene()
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	}
-
+	
 	//8-11
 	glm::mat4 cube3_Model_transfrom[4] = { glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f) };
 	for (int i = 0; i < 4; i++) {
 
 		glBindVertexArray(vao_cube3[i]);
 
-		if (stage == 1) cube3_Model_transfrom[i] = glm::translate(cube3_Model_transfrom[i], glm::vec3(CT1[i + 8].x, CT1[i + 8].y, CT1[i + 8].z));
-		else if (stage == 2) cube3_Model_transfrom[i] = glm::translate(cube3_Model_transfrom[i], glm::vec3(CT2[i + 8].x, CT2[i + 8].y, CT2[i + 8].z));
-		else if (stage == 3) cube3_Model_transfrom[i] = glm::translate(cube3_Model_transfrom[i], glm::vec3(CT3[i + 8].x, CT3[i + 8].y, CT3[i + 8].z));
+		cube3_Model_transfrom[i] = glm::translate(cube3_Model_transfrom[i], glm::vec3(CT[stage][i + 8].x, CT[stage][i + 8].y, CT[stage][i + 8].z));
+		//else if (stage == 2) cube3_Model_transfrom[i] = glm::translate(cube3_Model_transfrom[i], glm::vec3(CT2[i + 8].x, CT2[i + 8].y, CT2[i + 8].z));
+		//else if (stage == 3) cube3_Model_transfrom[i] = glm::translate(cube3_Model_transfrom[i], glm::vec3(CT3[i + 8].x, CT3[i + 8].y, CT3[i + 8].z));
 		cube3_Model_transfrom[i] = glm::rotate(cube3_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 		cube3_Model_transfrom[i] = glm::rotate(cube3_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 		cube3_Model_transfrom[i] = glm::rotate(cube3_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
@@ -471,9 +473,9 @@ GLvoid drawScene()
 
 		glBindVertexArray(vao_cube4[i]);
 
-		if (stage == 1) cube4_Model_transfrom[i] = glm::translate(cube4_Model_transfrom[i], glm::vec3(CT1[i + 12].x, CT1[i + 12].y, CT1[i + 12].z));
-		else if (stage == 2) cube4_Model_transfrom[i] = glm::translate(cube4_Model_transfrom[i], glm::vec3(CT2[i + 12].x, CT2[i + 12].y, CT2[i + 12].z));
-		else if (stage == 3) cube4_Model_transfrom[i] = glm::translate(cube4_Model_transfrom[i], glm::vec3(CT3[i + 12].x, CT3[i + 12].y, CT3[i + 12].z));
+		cube4_Model_transfrom[i] = glm::translate(cube4_Model_transfrom[i], glm::vec3(CT[stage][i + 12].x, CT[stage][i + 12].y, CT[stage][i + 12].z));
+		//else if (stage == 2) cube4_Model_transfrom[i] = glm::translate(cube4_Model_transfrom[i], glm::vec3(CT2[i + 12].x, CT2[i + 12].y, CT2[i + 12].z));
+		//else if (stage == 3) cube4_Model_transfrom[i] = glm::translate(cube4_Model_transfrom[i], glm::vec3(CT3[i + 12].x, CT3[i + 12].y, CT3[i + 12].z));
 		cube4_Model_transfrom[i] = glm::rotate(cube4_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 		cube4_Model_transfrom[i] = glm::rotate(cube4_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 		cube4_Model_transfrom[i] = glm::rotate(cube4_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
@@ -488,35 +490,35 @@ GLvoid drawScene()
 	//16-19
 	glm::mat4 cube5_Model_transfrom[4] = { glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f) };
 
-	if (stage == 2) limit = 3;
+	if (stage == 1) limit = 3;
 	else limit = 4;
 	for (int i = 0; i < limit; i++) {
 
 		glBindVertexArray(vao_cube5[i]);
 
-		if (stage == 1) cube5_Model_transfrom[i] = glm::translate(cube5_Model_transfrom[i], glm::vec3(CT1[i + 16].x, CT1[i + 16].y, CT1[i + 16].z));
-		else if (stage == 2) cube5_Model_transfrom[i] = glm::translate(cube5_Model_transfrom[i], glm::vec3(CT2[i + 16].x, CT2[i + 16].y, CT2[i + 16].z));
-		else if (stage == 3) cube5_Model_transfrom[i] = glm::translate(cube5_Model_transfrom[i], glm::vec3(CT3[i + 16].x, CT3[i + 16].y, CT3[i + 16].z));
+		cube5_Model_transfrom[i] = glm::translate(cube5_Model_transfrom[i], glm::vec3(CT[stage][i + 16].x, CT[stage][i + 16].y, CT[stage][i + 16].z));
+		//else if (stage == 2) cube5_Model_transfrom[i] = glm::translate(cube5_Model_transfrom[i], glm::vec3(CT2[i + 16].x, CT2[i + 16].y, CT2[i + 16].z));
+		//else if (stage == 3) cube5_Model_transfrom[i] = glm::translate(cube5_Model_transfrom[i], glm::vec3(CT3[i + 16].x, CT3[i + 16].y, CT3[i + 16].z));
 		cube5_Model_transfrom[i] = glm::rotate(cube5_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 		cube5_Model_transfrom[i] = glm::rotate(cube5_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 		cube5_Model_transfrom[i] = glm::rotate(cube5_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
 		cube5_Model_transfrom[i] = glm::scale(cube5_Model_transfrom[i], glm::vec3(1.0, 2.0, 1.0));
 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(cube5_Model_transfrom[i]));
-
+		if(stage == 2) glUniform4f(vColorLocation, 0.0f, 0.0f, 0.0f, 1.0f);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	}
 
-	if (stage == 1 || stage == 3) {
+	if (stage == 0 || stage == 2) {
 		//20-23
 		glm::mat4 cube6_Model_transfrom[4] = { glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f) };
 		for (int i = 0; i < 4; i++) {
 
 			glBindVertexArray(vao_cube6[i]);
 
-			if (stage == 1) cube6_Model_transfrom[i] = glm::translate(cube6_Model_transfrom[i], glm::vec3(CT1[i + 20].x, CT1[i + 20].y, CT1[i + 20].z));
-			else if (stage == 3) cube6_Model_transfrom[i] = glm::translate(cube6_Model_transfrom[i], glm::vec3(CT3[i + 20].x, CT3[i + 20].y, CT3[i + 20].z));
+			cube6_Model_transfrom[i] = glm::translate(cube6_Model_transfrom[i], glm::vec3(CT[stage][i + 20].x, CT[stage][i + 20].y, CT[stage][i + 20].z));
+			//else if (stage == 3) cube6_Model_transfrom[i] = glm::translate(cube6_Model_transfrom[i], glm::vec3(CT3[i + 20].x, CT3[i + 20].y, CT3[i + 20].z));
 			cube6_Model_transfrom[i] = glm::rotate(cube6_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 			cube6_Model_transfrom[i] = glm::rotate(cube6_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 			cube6_Model_transfrom[i] = glm::rotate(cube6_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
@@ -536,8 +538,8 @@ GLvoid drawScene()
 
 			glBindVertexArray(vao_cube7[i]);
 
-			if (stage == 1) cube7_Model_transfrom[i] = glm::translate(cube7_Model_transfrom[i], glm::vec3(CT1[i + 24].x, CT1[i + 24].y, CT1[i + 24].z));
-			else if (stage == 3) cube7_Model_transfrom[i] = glm::translate(cube7_Model_transfrom[i], glm::vec3(CT3[i + 24].x, CT3[i + 24].y, CT3[i + 24].z));
+			cube7_Model_transfrom[i] = glm::translate(cube7_Model_transfrom[i], glm::vec3(CT[stage][i + 24].x, CT[stage][i + 24].y, CT[stage][i + 24].z));
+			//else if (stage == 3) cube7_Model_transfrom[i] = glm::translate(cube7_Model_transfrom[i], glm::vec3(CT3[i + 24].x, CT3[i + 24].y, CT3[i + 24].z));
 			cube7_Model_transfrom[i] = glm::rotate(cube7_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 			cube7_Model_transfrom[i] = glm::rotate(cube7_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 			cube7_Model_transfrom[i] = glm::rotate(cube7_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
@@ -548,14 +550,14 @@ GLvoid drawScene()
 
 		}
 
-		if (stage == 1) {
+		if (stage == 0) {
 			//28-30
 			glm::mat4 cube8_Model_transfrom[4] = { glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f),glm::mat4(1.0f) };
 			for (int i = 0; i < 3; i++) {
 
 				glBindVertexArray(vao_cube8[i]);
 
-				cube8_Model_transfrom[i] = glm::translate(cube8_Model_transfrom[i], glm::vec3(CT1[i + 28].x, CT1[i + 28].y, CT1[i + 28].z));
+				cube8_Model_transfrom[i] = glm::translate(cube8_Model_transfrom[i], glm::vec3(CT[stage][i + 28].x, CT[stage][i + 28].y, CT[stage][i + 28].z));
 				cube8_Model_transfrom[i] = glm::rotate(cube8_Model_transfrom[i], (GLfloat)glm::radians(CR.x), glm::vec3(1.0, 0.0, 0.0));
 				cube8_Model_transfrom[i] = glm::rotate(cube8_Model_transfrom[i], (GLfloat)glm::radians(CR.y), glm::vec3(0.0, 1.0, 0.0));
 				cube8_Model_transfrom[i] = glm::rotate(cube8_Model_transfrom[i], (GLfloat)glm::radians(CR.z), glm::vec3(0.0, 0.0, 1.0));
@@ -844,12 +846,14 @@ void InitBuffer(){
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, objfile[3].faceNum * 3 * sizeof(int), objfile[3].face_v, GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(0);
+		if (stage == 1 && i == 2);
+		else{
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_color_cube5[i]);
+			glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), cube_color[0], GL_STATIC_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_color_cube5[i]);
-		glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), cube_color[0], GL_STATIC_DRAW);
-
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(1);
+		}
 	}
 
 	//20-23
@@ -899,11 +903,14 @@ void InitBuffer(){
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_color_cube7[i]);
-		glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), cube_color[1], GL_STATIC_DRAW);
+		if (stage == 2 && i == 0);
+		else {
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_color_cube7[i]);
+			glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), cube_color[1], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(1);
+		}
 	}
 
 	//28-30
@@ -926,11 +933,13 @@ void InitBuffer(){
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
 		glEnableVertexAttribArray(0);
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo_color_cube8[i]);
-		glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), cube_color[1], GL_STATIC_DRAW);
+		if (i != 2) {
+			glBindBuffer(GL_ARRAY_BUFFER, vbo_color_cube8[i]);
+			glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(GLfloat), cube_color[1], GL_STATIC_DRAW);
 
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
-		glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+			glEnableVertexAttribArray(1);
+		}
 	}
 
 }
@@ -981,7 +990,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
 	{
-	case 'a':
+	case 'd':
 		if (isMove_x == 0)
 			glutTimerFunc(10, TimerFunction, 1);
 		
@@ -990,7 +999,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 			isMove_x = 1;
 		break;
-	case 'A':
+	case 'a':
 		if (isMove_x == 0)
 			glutTimerFunc(10, TimerFunction, 1);
 
@@ -999,7 +1008,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 			isMove_x = -1;
 		break;
-	case 's':
+	case 'z':
 		if (isMove_y == 0)
 			glutTimerFunc(10, TimerFunction, 3);
 
@@ -1008,7 +1017,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 			isMove_y = 1;
 		break;
-	case 'S':
+	case 'c':
 		if (isMove_y == 0)
 			glutTimerFunc(10, TimerFunction, 3);
 
@@ -1017,7 +1026,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 			isMove_y = -1;
 		break;
-	case 'd':
+	case 's':
 		if (isMove_z == 0)
 			glutTimerFunc(10, TimerFunction, 4);
 
@@ -1026,7 +1035,7 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 			isMove_z = 1;
 		break;
-	case 'D':
+	case 'w':
 		if (isMove_z == 0)
 			glutTimerFunc(10, TimerFunction, 4);
 
@@ -1035,7 +1044,19 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 		else
 			isMove_z = -1;
 		break;
-	case 'm':
+	
+	
+	case 'e':
+		rotate_screen += 1.0;
+		break;
+	case 'q':
+		rotate_screen -= 1.0;
+		break;
+	case 'Q':
+		glutDestroyWindow(windowID);
+		break;
+	/*
+	 case 'm':
 		if (isRotate == 0)
 			glutTimerFunc(10, TimerFunction, 2);
 
@@ -1071,38 +1092,6 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case 'Y':
 		rotate_camera_y -= 1.0;
 		break;
-	case 'r':
-		rotate_screen += 1.0;
-		break;
-	case 'R':
-		rotate_screen -= 1.0;
-		break;
-	case 'c':
-		isMove_x = 0;
-		isRotate = 0;
-		isRotateArm = 0;
-		isCameraRotate_ori = 0;
-
-		Cube_trans[0] = glm::vec3(0, 1, 0);
-		Cube_trans[1] = glm::vec3(0, 0.5, 0);
-		Cube_trans[2] = glm::vec3(-0.15, 0.3, 0);
-		Cube_trans[3] = glm::vec3(0.15, 0.3, 0);
-		Cube_rotate[0] = glm::vec3(0, 0, 0);
-		Cube_rotate[1] = glm::vec3(0, 0, 0);
-		Cube_rotate[2] = glm::vec3(0, 0, 0);
-		Cube_rotate[3] = glm::vec3(0, 0, 0);
-
-
-		pos_trans = glm::vec3(3.5f, 6.0f, 5.5f);
-		dir_trans = glm::vec3 (0.0f, 0.0f, 0.0f);
-		camera_pos = { 0, 0, 0 };
-		rotate_screen = 0.0;
-		rotate_camera_y = 0.0;
-		break;
-	case 'q':
-		glutDestroyWindow(windowID);
-		break;
-
 	case'j':
 		camera_pos.x += 0.1f;
 		break;
@@ -1121,22 +1110,135 @@ GLvoid Keyboard(unsigned char key, int x, int y)
 	case'L':
 		camera_pos.z -= 0.1f;
 		break;
+	*/
 	case'1':
-		stage = 1;
+		stage = 0;
+		InitBuffer();
+		reset();
 		break;
 	case'2':
-		stage = 2;
+		stage = 1;
+		InitBuffer();
+		reset();
 		break;
 	case'3':
-		stage = 3;
+		stage = 2;
+		InitBuffer();
+		reset();
 		break;
-
+	case 'r':
+		reset();
+		break;
 	}
 
 
 	glutPostRedisplay();
 }
 
+void reset() {
+	isMove_x = 0;
+	isRotate = 0;
+	isRotateArm = 0;
+	isCameraRotate_ori = 0;
+
+	Cube_trans[0] = glm::vec3(0, 1, 0);
+	Cube_trans[1] = glm::vec3(0, 0.5, 0);
+	Cube_trans[2] = glm::vec3(-0.15, 0.3, 0);
+	Cube_trans[3] = glm::vec3(0.15, 0.3, 0);
+	Cube_rotate[0] = glm::vec3(0, 0, 0);
+	Cube_rotate[1] = glm::vec3(0, 0, 0);
+	Cube_rotate[2] = glm::vec3(0, 0, 0);
+	Cube_rotate[3] = glm::vec3(0, 0, 0);
+
+	glm::vec3 CT[3][31] = {
+		{
+				glm::vec3(0, 0, 0) , //바닥부분 시작
+				glm::vec3(1, 0, 0) ,
+				glm::vec3(2, 0, 0) ,
+				glm::vec3(3, 0, 0) ,
+				glm::vec3(4, 0, 0) , //바닥부분 끝
+				glm::vec3(0, 1, -1) , //벽부분 시작
+				glm::vec3(1, 1, -1) ,
+				glm::vec3(2, 1, -1) ,
+				glm::vec3(3, 1, -1) ,
+				glm::vec3(4, 1, -1) ,
+				glm::vec3(0, 2, -1) ,
+				glm::vec3(1, 2, -1) ,
+				glm::vec3(2, 2, -1) ,
+				glm::vec3(3, 2, -1) ,
+				glm::vec3(4, 2, -1) ,
+				glm::vec3(0, 3, -1) ,
+				glm::vec3(1, 3, -1) ,
+				glm::vec3(2, 3, -1) ,
+				glm::vec3(3, 3, -1) ,
+				glm::vec3(4, 3, -1) ,
+				glm::vec3(0, 4, -1) ,
+				glm::vec3(1, 4, -1) ,
+				glm::vec3(2, 4, -1) ,
+				glm::vec3(3, 4, -1) ,
+				glm::vec3(4, 4, -1) ,
+				glm::vec3(0, 5, -1) ,
+				glm::vec3(1, 5, -1) ,
+				glm::vec3(2, 5, -1) ,
+				glm::vec3(3, 5, -1) ,
+				glm::vec3(4, 5, -1) , //벽부분 끝
+				glm::vec3(2, 6, -1)
+		},
+		{
+				glm::vec3(0, 0, 0) , //바닥부분 시작
+				glm::vec3(1, 0, 0) ,
+				glm::vec3(2, 0, 0) , //바닥부분 끝
+				glm::vec3(0, 1, -1) , //벽부분 시작
+				glm::vec3(1, 1, -1) ,
+				glm::vec3(2, 1, -1) ,
+				glm::vec3(0, 2, -1) ,
+				glm::vec3(1, 2, -1) ,
+				glm::vec3(2, 2, -1) ,
+				glm::vec3(0, 3, -1) ,
+				glm::vec3(1, 3, -1) ,
+				glm::vec3(2, 3, -1) ,
+				glm::vec3(0, 4, -1) ,
+				glm::vec3(1, 4, -1) ,
+				glm::vec3(2, 4, -1) ,
+				glm::vec3(0, 5, -1) ,
+				glm::vec3(1, 5, -1) ,
+				glm::vec3(2, 5, -1) , //벽부분 끝
+				glm::vec3(1, 6, -1)
+		},
+		{
+				glm::vec3(0, 0, 0) ,//바닥부분 시작
+				glm::vec3(1, 0, -1) ,
+				glm::vec3(2, 0, -2) ,
+				glm::vec3(3, 0, -3) , //바닥부분 끝
+				glm::vec3(0, 1, -1) , //벽부분 시작
+				glm::vec3(0, 2, -1) ,
+				glm::vec3(0, 3, -1) ,
+				glm::vec3(0, 4, -1) ,
+				glm::vec3(0, 5, -1) ,
+				glm::vec3(1, 1, -2) ,
+				glm::vec3(1, 2, -2) ,
+				glm::vec3(1, 3, -2) ,
+				glm::vec3(1, 4, -2) ,
+				glm::vec3(1, 5, -2) ,
+				glm::vec3(2, 1, -3) ,
+				glm::vec3(2, 2, -3) ,
+				glm::vec3(2, 3, -3) ,
+				glm::vec3(2, 4, -3) ,
+				glm::vec3(2, 5, -3) ,
+				glm::vec3(3, 1, -4) ,
+				glm::vec3(3, 2, -4) ,
+				glm::vec3(3, 3, -4) ,
+				glm::vec3(3, 4, -4) ,
+				glm::vec3(3, 5, -4) , //벽부분 끝
+				glm::vec3(3, 6, -4)
+		}
+	};
+	pos_trans = glm::vec3(3.5f, 6.0f, 5.5f);
+	dir_trans = glm::vec3(0.0f, 0.0f, 0.0f);
+	camera_pos = { 0, 0, 0 };
+	rotate_screen = 0.0;
+	rotate_camera_y = 0.0;
+}
 
 char* filetobuf(const char* file)
 {
